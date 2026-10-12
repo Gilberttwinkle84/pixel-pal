@@ -164,6 +164,22 @@ input.txt{width:100%;font:inherit;font-size:16px;padding:12px 14px;border-radius
 .acct-card b{display:block;font-size:16px}
 .note{font-size:13.5px;color:var(--muted);line-height:1.5;margin:8px 0 0}
 .errtxt{color:#e5383b;font-weight:500}
+.tbtn{position:relative;white-space:nowrap}
+.gear{position:absolute;top:0;right:0;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center}
+.gear::before{content:"";position:absolute;inset:-10px}
+.gear .i{width:12px;height:12px}
+#optSize .opt{font-size:12.5px;padding:10px 2px}
+#optFill .opt{font-size:13.5px;padding:12px 2px}
+.tools{gap:4px;padding:8px}
+.seg .tbtn{width:54px}
+.acts{gap:2px}
+.acts .tbtn{width:44px}
+.autobar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);padding:7px 8px 7px 14px;border-radius:99px;box-shadow:var(--shadow);z-index:6;white-space:nowrap;max-width:96%}
+.autobar span{font-weight:700;font-size:13px;min-width:58px}
+.autobar input{width:80px;height:24px}
+.autobar .mini{border:0;border-radius:99px;padding:8px 12px;font-weight:700;font-size:13px;background:rgba(127,127,160,.35);color:inherit}
+.autobar .mini.stop{background:#e5383b;color:#fff}
+#btnAuto.running{background:#e5383b;color:#fff}
 input[type=range]{accent-color:var(--accent);height:30px;margin:0}
 #crop{position:fixed;inset:0;z-index:60;background:#0c0c1a;color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 .crop-top{display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
@@ -230,17 +246,19 @@ input[type=range]{accent-color:var(--accent);height:30px;margin:0}
       <div class="pct" id="gPct">0%</div>
       <button class="iconbtn" id="btnRestart" aria-label="Start over"><span class="i" data-i="restart"></span></button>
     </div>
-    <div id="stage"><canvas id="cv"></canvas><div class="toast" id="toast"></div></div>
+    <div id="stage"><canvas id="cv"></canvas><div class="toast" id="toast"></div>
+      <div class="autobar hidden" id="autoBar"><span id="autoTxt">Auto 0%</span><input type="range" id="autoSpd" min="1" max="10" value="6" aria-label="Auto-fill speed"><button class="mini" id="autoPause">Pause</button><button class="mini stop" id="autoStop">Stop</button></div></div>
     <div class="tools">
       <div class="seg" id="toolSeg">
         <button class="tbtn on" data-tool="tap"><span class="i" data-i="hand"></span>Tap</button>
         <button class="tbtn" data-tool="brush"><span class="i" data-i="brush"></span>Brush</button>
-        <button class="tbtn" data-tool="fill"><span class="i" data-i="bucket"></span>Fill</button>
+        <button class="tbtn" data-tool="fill"><span class="i" data-i="bucket"></span><span id="fillLab">Fill</span><span class="gear" id="fillGear" role="button" aria-label="Fill area settings"><span class="i" data-i="sliders"></span></span></button>
       </div>
       <div class="acts">
         <button class="tbtn" id="btnUndo" disabled><span class="i" data-i="undo"></span>Undo</button>
         <button class="tbtn" id="btnFind"><span class="i" data-i="target"></span>Find</button>
         <button class="tbtn" id="btnPeek"><span class="i" data-i="eye"></span>Peek</button>
+        <button class="tbtn" id="btnAuto"><span class="i" id="autoIco" data-i="play"></span><span id="autoLab">Auto</span><span class="gear" id="autoGear" role="button" aria-label="Auto-fill settings"><span class="i" data-i="sliders"></span></span></button>
       </div>
     </div>
     <div class="pal" id="pal"></div>
@@ -254,15 +272,18 @@ input[type=range]{accent-color:var(--accent);height:30px;margin:0}
   <input type="file" id="impFile" accept="image/*" class="hidden">
   <div class="row" style="margin-bottom:0"><button class="btn alt" id="impPick" style="margin-top:0">Choose photo</button><button class="btn alt" id="impCrop" style="margin-top:0" disabled>Crop and zoom</button></div>
   <div class="prev" id="impPrev">No photo yet</div>
-  <div class="lbl">Size</div>
-  <div class="opts" id="optSize">
-    <button class="opt" data-v="24">Small<small>24 px</small></button>
-    <button class="opt on" data-v="36">Medium<small>36 px</small></button>
-    <button class="opt" data-v="48">Large<small>48 px</small></button>
-    <button class="opt" data-v="64">XL<small>64 px</small></button>
+  <div class="lbl" style="display:flex;justify-content:space-between"><span>Detail</span><span id="detVal">64 px</span></div>
+  <input type="range" id="optDetail" min="16" max="256" step="4" value="64" style="width:100%" aria-label="Detail level">
+  <div class="opts" id="optSize" style="margin-top:8px">
+    <button class="opt" data-v="32">Low<small>32</small></button>
+    <button class="opt on" data-v="64">Medium<small>64</small></button>
+    <button class="opt" data-v="96">High<small>96</small></button>
+    <button class="opt" data-v="160">Ultra<small>160</small></button>
+    <button class="opt" data-v="256">Extreme<small>256</small></button>
   </div>
-  <div class="lbl" style="display:flex;justify-content:space-between"><span>Colors</span><span id="colVal">up to 16 (max 40)</span></div>
-  <input type="range" id="optColors" min="4" max="40" value="16" step="1" style="width:100%" aria-label="Number of colors">
+  <p class="note" id="detNote"></p>
+  <div class="lbl" style="display:flex;justify-content:space-between"><span>Colors</span><span id="colVal">45</span></div>
+  <input type="range" id="optColors" min="4" max="102" value="45" step="1" style="width:100%" aria-label="Number of colors">
   <div class="lbl">Cleanup</div>
   <div class="opts" id="optSmooth">
     <button class="opt" data-v="0">Detailed<small>keeps tiny bits</small></button>
@@ -282,7 +303,9 @@ input[type=range]{accent-color:var(--accent);height:30px;margin:0}
   <p id="winText"></p>
   <img id="winImg" class="winimg" alt="Your finished pixel art">
   <p style="font-size:13px;margin-bottom:0">Press and hold the picture to save it to Photos.</p>
-  <button class="btn" id="winShare">Share picture</button>
+  <button class="btn" id="winShare">Save to Photos</button>
+  <button class="btn alt" id="winDownload">Download image</button>
+  <p class="note" id="saveMsg"></p>
   <button class="btn alt" id="winGroup">Add to a group</button>
   <div class="row"><button class="btn alt" id="winNext">Next puzzle</button><button class="btn alt" id="winHome">Completed</button></div>
 </div></div>
@@ -291,6 +314,8 @@ input[type=range]{accent-color:var(--accent);height:30px;margin:0}
 <div class="sheet-back" id="sheetSettings"><div class="sheet">
   <h3>Settings</h3>
   <div class="tgl"><span>Sound effects</span><button class="switch" id="swSound" aria-label="Sound effects"></button></div>
+  <div class="tgl"><span>Fill tool area</span><button class="linkbtn" id="btnFillSet"><span id="fillCur">5×5</span> ›</button></div>
+  <div class="tgl"><span>Auto-fill speed and order</span><button class="linkbtn" id="btnAutoSet">Change ›</button></div>
   <ol class="how">
     <li>Tap a <b>color</b> at the bottom, then tap the cells with that number.</li>
     <li><b>Tap</b> paints one cell and drag moves the picture. <b>Brush</b> paints as you drag. <b>Fill</b> paints a whole connected area of your color. Cells with a one-cell gap between them still count as connected.</li>
@@ -304,8 +329,11 @@ input[type=range]{accent-color:var(--accent);height:30px;margin:0}
 <!-- Group picker sheet -->
 <div class="sheet-back" id="sheetMove"><div class="sheet">
   <h3 id="mvT">Puzzle</h3>
-  <p>Put this puzzle in a group. Every group gets its own tab in Completed.</p>
+  <p>Put this puzzle in a group. Every group gets its own tab in Completed, and the puzzle only shows in that tab.</p>
   <div id="mvList"></div>
+  <button class="btn" id="mvSave">Save to Photos</button>
+  <button class="btn alt" id="mvDownload">Download image</button>
+  <p class="note" id="mvMsg"></p>
   <button class="btn alt" id="mvNew">New group</button>
   <button class="btn danger hidden" id="mvDel">Delete this photo puzzle</button>
   <button class="btn alt" data-close="#sheetMove">Done</button>
@@ -337,6 +365,37 @@ input[type=range]{accent-color:var(--accent);height:30px;margin:0}
   <p class="note errtxt hidden" id="acctMsg"></p>
   <p class="note" style="margin-top:14px">Privacy: your photos are never uploaded. Only the small numbered pixel grid you create is saved, and only to your own account. Nobody else can open it.</p>
   <button class="btn alt" data-close="#sheetAcct">Close</button>
+</div></div>
+
+<!-- Fill area sheet -->
+<div class="sheet-back" id="sheetFill"><div class="sheet">
+  <h3>Fill area size</h3>
+  <p id="fillDesc"></p>
+  <div class="opts" id="optFill">
+    <button class="opt" data-v="3">3×3</button>
+    <button class="opt" data-v="5">5×5</button>
+    <button class="opt" data-v="7">7×7</button>
+    <button class="opt" data-v="9">9×9</button>
+    <button class="opt" data-v="15">15×15</button>
+  </div>
+  <button class="btn" data-close="#sheetFill">Done</button>
+</div></div>
+
+<!-- Auto-fill sheet -->
+<div class="sheet-back" id="sheetAuto"><div class="sheet">
+  <h3>Auto-fill</h3>
+  <p>Fills the puzzle in for you. You can pause or stop any time, and Undo takes back everything it filled.</p>
+  <div class="lbl" style="display:flex;justify-content:space-between"><span>Speed</span><span id="spdVal"></span></div>
+  <input type="range" id="optSpeed" min="1" max="10" value="6" step="1" style="width:100%" aria-label="Speed">
+  <p class="note" id="spdNote"></p>
+  <div class="lbl">Order</div>
+  <div class="opts" id="optOrder">
+    <button class="opt" data-v="number">By number<small>1, 2, 3…</small></button>
+    <button class="opt" data-v="top">Top to bottom<small>row by row</small></button>
+    <button class="opt" data-v="random">Random<small>sprinkled</small></button>
+  </div>
+  <button class="btn" id="autoStart">Start auto-fill</button>
+  <button class="btn alt" data-close="#sheetAuto">Close</button>
 </div></div>
 
 <!-- Confirm sheet -->
@@ -397,6 +456,8 @@ const ICONS={
   camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
   sliders:'<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/>'
 };
+ICONS.play='<path d="M7 4.5v15l12-7.5z"/>';
+ICONS.stop='<rect x="6" y="6" width="12" height="12" rx="2"/>';
 $$('[data-i]').forEach(el=>{el.innerHTML='<svg viewBox="0 0 24 24">'+ICONS[el.dataset.i]+'</svg>'});
 
 /* ---------- picture definitions ---------- */
@@ -574,6 +635,8 @@ const lum=rgb=>0.299*rgb[0]+0.587*rgb[1]+0.114*rgb[2];
 const mix=(a,b,t)=>a.map((v,i)=>Math.round(v*(1-t)+b[i]*t));
 const rgbs=a=>`rgb(${a[0]},${a[1]},${a[2]})`;
 const vivid=(rgb,k)=>{const L=lum(rgb);return rgb.map(c=>clamp(Math.round(L+(c-L)*k),0,255))};
+const pk32=a=>(((255<<24)|(a[2]<<16)|(a[1]<<8)|a[0])>>>0);
+const rgbOf=str=>str.match(/\d+/g).map(Number);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* ---------- theme ---------- */
@@ -643,14 +706,17 @@ function recompute(){
   rem=new Array(pal.length+1).fill(0);doneCount=0;
   for(let i=0;i<cells.length;i++){const n=cells[i];if(n){if(painted[i])doneCount++;else rem[n]++}}
 }
+let pal32=[],gray32=[],hi32=[],miniC=null,miniX=null,miniI=null;
 function buildTones(){
-  gray=[];hi=[];edge=[];numc=[];
+  gray=[];hi=[];edge=[];numc=[];pal32=[];gray32=[];hi32=[];
   pal.forEach((h,i)=>{
     const rgb=hex2rgb(h);
     gray[i+1]=grayFor(h);
-    const vv=vivid(rgb,1.35);let f=mix(vv,[255,255,255],.38),tr=0;
-    while(lum(f)<196&&tr<12){f=mix(f,[255,255,255],.14);tr++}
-    hi[i+1]=rgbs(f);edge[i+1]=rgbs(mix(vv,[0,0,0],.28));numc[i+1]=rgbs(mix(vv,[0,0,0],.62));
+    const cands=[[255,255,255],[255,241,168],[190,233,255]];let f=cands[0],bd=-1;
+    cands.forEach(c=>{const d=(c[0]-rgb[0])**2+(c[1]-rgb[1])**2+(c[2]-rgb[2])**2;if(d>bd){bd=d;f=c}});
+    
+    hi[i+1]=rgbs(f);edge[i+1]='#16152e';numc[i+1]='#16152e';
+    pal32[i+1]=pk32(rgb);gray32[i+1]=pk32(rgbOf(gray[i+1]));hi32[i+1]=pk32(f);
   });
 }
 function buildPalette(){
@@ -696,6 +762,7 @@ function toast(msg,ms=1500){
 
 /* ---------- open / close picture ---------- */
 function openPicture(p){
+  if(autoOn)stopAuto(false);
   pic=p;cells=p.cells;pal=p.palette;total=p.total;
   painted=loadProg(p);recompute();
   undoStack=[];stroke=[];won=false;pops.clear();fx.length=0;anim=null;peek=false;
@@ -714,7 +781,7 @@ function show(which){
   $('#home').classList.toggle('hidden',which!=='home');
   $('#game').classList.toggle('hidden',which!=='game');
 }
-function goHome(){saveNow();flushCloud();pic=null;show('home');renderHome()}
+function goHome(){if(autoOn)stopAuto(false);saveNow();flushCloud();pic=null;show('home');renderHome()}
 
 /* ---------- canvas sizing & view ---------- */
 function resizeCanvas(){
@@ -747,6 +814,7 @@ function cellAt(x,y){
 
 /* ---------- drawing ---------- */
 function frame(now){
+  if(pops.size)for(const [pi,pt] of pops)if(now-pt>600)pops.delete(pi);
   raf=0;
   if(anim){
     const k=Math.min(1,(now-anim.t0)/anim.dur),e=1-Math.pow(1-k,3);
@@ -768,12 +836,20 @@ function draw(now){
   ctx.fillStyle=T.paper;ctx.fillRect(ox,oy,w*cs,h*cs);ctx.restore();
   const x0=Math.max(0,Math.floor(-ox/cs)),x1=Math.min(w-1,Math.floor((W-ox)/cs));
   const y0=Math.max(0,Math.floor(-oy/cs)),y1=Math.min(h-1,Math.floor((H-oy)/cs));
-  const showNum=cs>=13&&!complete;let F1='',F2='',cur='';
+  const useMini=cs<4.5&&w*h>900;
+  if(useMini){ // zoomed far out on a big picture: draw it as one scaled image so it stays smooth
+    if(!miniC||miniC.width!==w||miniC.height!==h){miniC=document.createElement('canvas');miniC.width=w;miniC.height=h;miniX=miniC.getContext('2d');miniI=miniX.createImageData(w,h)}
+    const u=new Uint32Array(miniI.data.buffer);
+    for(let i=0;i<u.length;i++){const n=cells[i];u[i]=!n?0:(painted[i]||peek)?pal32[n]:(n===sel?hi32[n]:gray32[n])}
+    miniX.putImageData(miniI,0,0);
+    ctx.imageSmoothingEnabled=false;ctx.drawImage(miniC,ox,oy,w*cs,h*cs);ctx.imageSmoothingEnabled=true;
+  }
+  const showNum=cs>=(pal.length>99?20:13)&&!complete;let F1='',F2='',cur='';
   if(showNum){
-    {const fs_=Math.max(8,Math.floor(cs*(pal.length>9?0.42:0.5))),fam='-apple-system,"SF Pro Display",system-ui,"DM Sans",sans-serif';F1=`600 ${fs_}px ${fam}`;F2=`800 ${fs_}px ${fam}`}
+    {const fs_=Math.max(8,Math.floor(cs*(pal.length>99?0.32:pal.length>9?0.42:0.5))),fam='-apple-system,"SF Pro Display",system-ui,"DM Sans",sans-serif';F1=`600 ${fs_}px ${fam}`;F2=`800 ${fs_}px ${fam}`}
     ctx.textAlign='center';ctx.textBaseline='middle';
   }
-  for(let y=y0;y<=y1;y++){
+  for(let y=y0;y<=(useMini?-1:y1);y++){
     const py=Math.round(oy+y*cs),ph=Math.round(oy+(y+1)*cs)-py;
     for(let x=x0;x<=x1;x++){
       const i=y*w+x,n=cells[i];if(!n)continue;
@@ -832,6 +908,7 @@ function afterPaint(){
   blip(440+(doneCount/total)*560);
 }
 function paintAt(x,y){
+  if(autoOn)return false;
   const i=cellAt(x,y);if(i<0)return false;
   if(cells[i]===sel&&!painted[i]){doPaint(i);afterPaint();return true}
   return false;
@@ -846,7 +923,7 @@ function floodFrom(i){
   }
   return out;
 }
-function tapAt(x,y){
+function tapAt(x,y){if(autoOn)return;
   const i=cellAt(x,y);if(i<0)return;
   if(tool==='fill'){fillRegion(i);return}
   const n=cells[i];if(!n||painted[i])return;
@@ -856,17 +933,18 @@ function tapAt(x,y){
   }
   doPaint(i);afterPaint();
 }
-// Connected area: cells of the selected color link up when they are within 2 cells of each other
-// (touching, diagonal, or with a one-cell gap between them).
+// The fill always covers every connected square of the selected color.
+// Each square reaches an N x N area around itself (the Fill setting), which decides how far the
+// fill can jump across gaps: 3x3 = squares must touch (corners count), 5x5 = jumps a 1-square gap, and so on.
 function reachFrom(i){
-  const w=pic.w,h=pic.h,cx=i%w,cy=(i/w)|0,seen=new Uint8Array(w*h),depth=new Int32Array(w*h),q=[];
+  const w=pic.w,h=pic.h,cx=i%w,cy=(i/w)|0,seen=new Uint8Array(w*h),depth=new Int32Array(w*h),q=[],R=(fillSize-1)>>1;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=w||y>=h)continue;
     const j=y*w+x;if(cells[j]===sel&&!painted[j]&&!seen[j]){seen[j]=1;q.push(j)}
   }
   for(let k=0;k<q.length;k++){
     const c=q[k],x=c%w,y=(c/w)|0;
-    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+    for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){
       const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;
       const j=ny*w+nx;
       if(!seen[j]&&cells[j]===sel&&!painted[j]){seen[j]=1;depth[j]=depth[c]+1;q.push(j)}
@@ -874,11 +952,13 @@ function reachFrom(i){
   }
   return {list:q,depth};
 }
-function setHover(i){
-  hoverCell=i;hoverList=i>=0?reachFrom(i).list:[];invalidate();
+let fillSize=(()=>{const v=store.get('pp.fill','');return ['3','5','7','9','15'].includes(v)?+v:5})();
+function regionFor(i){return reachFrom(i)}
+function setHover(i){if(autoOn)return;
+  hoverCell=i;hoverList=i>=0?regionFor(i).list:[];invalidate();
 }
 function fillRegion(i){
-  const {list,depth}=reachFrom(i),now=performance.now();
+  const {list,depth}=regionFor(i),now=performance.now();
   if(!list.length){
     fx.push({i,t0:now,dur:380,kind:'wrong',r:1});invalidate();
     toast(`No color ${sel} cells here`,1300);blip(160,.06,.12);return;
@@ -902,6 +982,7 @@ function revertStroke(){
   stroke=[];refreshSw(sel);updateProgress();invalidate();
 }
 function undo(){
+  if(autoOn)stopAuto(true);
   if(stroke.length)endStroke();
   const s=undoStack.pop();if(!s)return;
   s.forEach(i=>{painted[i]=0;rem[cells[i]]++;doneCount--;pops.delete(i)});
@@ -921,10 +1002,10 @@ cv.addEventListener('pointerdown',e=>{
   const pt=local(e);ptrs.set(e.pointerId,{x:pt.x,y:pt.y,sx:pt.x,sy:pt.y});
   anim=null;
   if(ptrs.size===1){
-    stroke=[];strokeStart=performance.now();moved=false;hadMulti=false;mode='single';
+    if(!autoOn)stroke=[];strokeStart=performance.now();moved=false;hadMulti=false;mode='single';
     if(tool==='brush')paintAt(pt.x,pt.y);else if(tool==='fill'){setHover(cellAt(pt.x,pt.y))}
   }else if(ptrs.size===2){
-    if(tool==='brush'&&performance.now()-strokeStart<220)revertStroke();
+    if(tool==='brush'&&!autoOn&&performance.now()-strokeStart<220)revertStroke();
     hadMulti=true;moved=true;mode='pinch';hoverCell=-1;invalidate();
     const [a,b]=[...ptrs.values()];
     pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2};
@@ -955,7 +1036,7 @@ function endPtr(e,cancel){
   ptrs.delete(e.pointerId);
   if(ptrs.size===0){
     if(!cancel&&mode==='single'&&tool!=='brush'&&!moved&&!hadMulti)tapAt(p.x,p.y);
-    hoverCell=-1;endStroke();mode=null;invalidate();
+    hoverCell=-1;if(!autoOn)endStroke();mode=null;invalidate();
   }else if(ptrs.size===1){mode='single';moved=true}
 }
 cv.addEventListener('pointerup',e=>endPtr(e,false));
@@ -970,9 +1051,9 @@ cv.addEventListener('contextmenu',e=>e.preventDefault());
 /* ---------- toolbar ---------- */
 const TOOL_HINT={tap:'Tap to paint. Drag to move the picture.',brush:'Drag to paint. Use two fingers to move.',fill:'Tap to paint a whole area. Cells with one gap between them count as connected.'};
 $$('#toolSeg .tbtn').forEach(b=>b.addEventListener('click',()=>{
-  tool=b.dataset.tool;hoverCell=-1;
+  const was=tool;tool=b.dataset.tool;hoverCell=-1;if(was==='fill'&&tool==='fill'){syncFill();openSheet('#sheetFill');return}
   $$('#toolSeg .tbtn').forEach(x=>x.classList.toggle('on',x===b));
-  toast(TOOL_HINT[tool],1800);
+  toast(tool==='fill'?fillHint():TOOL_HINT[tool],1800);
 }));
 $('#btnUndo').addEventListener('click',undo);
 $('#btnFind').addEventListener('click',findCell);
@@ -1001,6 +1082,7 @@ pk.addEventListener('contextmenu',e=>e.preventDefault());
 $('#btnBack').addEventListener('click',goHome);
 $('#btnRestart').addEventListener('click',async()=>{
   if(!pic)return;
+  if(autoOn)stopAuto(false);
   if(await ask('Start over?','This clears all the color you added to this puzzle.','Start over')){
     painted.fill(0);recompute();undoStack=[];stroke=[];won=false;pops.clear();
     for(let n=1;n<=pal.length;n++)refreshSw(n);
@@ -1038,13 +1120,14 @@ $('#btnResetAll').addEventListener('click',async()=>{
 
 /* ---------- win ---------- */
 let winCanvas=null;
-function renderArt(){
-  const sc=Math.max(4,Math.floor(1024/Math.max(pic.w,pic.h)));
-  const c=document.createElement('canvas');c.width=pic.w*sc;c.height=pic.h*sc;
+function renderArt(p){
+  p=p||pic;
+  const sc=Math.max(4,Math.floor(1024/Math.max(p.w,p.h)));
+  const c=document.createElement('canvas');c.width=p.w*sc;c.height=p.h*sc;
   const g=c.getContext('2d');g.fillStyle='#ffffff';g.fillRect(0,0,c.width,c.height);
-  for(let y=0;y<pic.h;y++)for(let x=0;x<pic.w;x++){
-    const n=cells[y*pic.w+x];if(!n)continue;
-    g.fillStyle=pal[n-1];g.fillRect(x*sc,y*sc,sc,sc);
+  for(let y=0;y<p.h;y++)for(let x=0;x<p.w;x++){
+    const n=p.cells[y*p.w+x];if(!n)continue;
+    g.fillStyle=p.palette[n-1];g.fillRect(x*sc,y*sc,sc,sc);
   }
   return c;
 }
@@ -1055,7 +1138,7 @@ function win(){
 }
 function showWin(){
   if(!pic)return;
-  winCanvas=renderArt();
+  winCanvas=renderArt();say('#saveMsg','');
   $('#winImg').src=winCanvas.toDataURL('image/png');
   $('#winImg').style.aspectRatio=pic.w+'/'+pic.h;
   $('#winText').textContent=`You colored all ${total} pixels of “${pic.name}”.`;
@@ -1072,15 +1155,36 @@ $('#winNext').addEventListener('click',()=>{
   }
   goHome();
 });
-$('#winShare').addEventListener('click',async()=>{
+const artName=p=>'pixel-pal-'+((p.name||'puzzle').replace(/[^\w]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'puzzle')+'.png';
+const artBlob=p=>new Promise((res,rej)=>renderArt(p).toBlob(b=>b?res(b):rej(new Error('no image')),'image/png'));
+const say=(sel_,t)=>{const el=$(sel_);if(el)el.textContent=t||''};
+// Save to Photos: the phone's share menu has a "Save Image" button that puts the picture in Photos
+async function saveToPhotos(p,msg){
+  say(msg,'');
   try{
-    const blob=await new Promise(r=>winCanvas.toBlob(r,'image/png'));
-    const file=new File([blob],'pixel-pal-'+pic.name.replace(/\W+/g,'-').toLowerCase()+'.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:pic.name});return}
+    const blob=await artBlob(p),file=new File([blob],artName(p),{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:p.name});return}
   }catch(e){if(e&&e.name==='AbortError')return}
-  toast('Press and hold the picture, then tap Save to Photos',2600);
-  closeSheet('#sheetWin');setTimeout(()=>openSheet('#sheetWin'),0);
-});
+  say(msg,'This browser cannot open the share menu. Press and hold the picture and choose Add to Photos, or tap Download image.');
+}
+async function downloadImage(p,msg){
+  say(msg,'');
+  try{
+    const blob=await artBlob(p),name=artName(p);
+    if(window.claude&&window.claude.use){ // inside claude.ai the page asks for a download through Claude
+      const d=await window.claude.use('downloads');
+      if(d){try{await d.save({filename:name,data:blob})}catch(e){if(!e||e.code!=='declined')say(msg,'Could not save the image here.')}return}
+    }
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    say(msg,'Saved as '+name+'. Find it in the Files app under Downloads.');
+  }catch(e){say(msg,'Could not create the image. Please try again.')}
+}
+$('#winShare').addEventListener('click',()=>{if(pic)saveToPhotos(pic,'#saveMsg')});
+$('#winDownload').addEventListener('click',()=>{if(pic)downloadImage(pic,'#saveMsg')});
+$('#mvSave').addEventListener('click',()=>{const p=allPics().find(x=>x.id===movingId);if(p)saveToPhotos(p,'#mvMsg')});
+$('#mvDownload').addEventListener('click',()=>{const p=allPics().find(x=>x.id===movingId);if(p)downloadImage(p,'#mvMsg')});
 
 /* ---------- confetti ---------- */
 function confetti(){
@@ -1119,7 +1223,7 @@ function thumbFor(p,arr,count){
     }
     id.data[i*4]=rgb[0];id.data[i*4+1]=rgb[1];id.data[i*4+2]=rgb[2];id.data[i*4+3]=255;
   }
-  g.putImageData(id,0,0);return c;
+  g.putImageData(id,0,0);if(p.w>100||p.h>100)c.style.imageRendering='auto';return c;
 }
 /* groups for completed puzzles */
 let groups={list:[],map:{}},homeTab=store.get('pp.tab','')==='done'?'done':'puzzles',doneGroup='all',movingId=null;
@@ -1171,7 +1275,7 @@ function renderMove(){
   row('No group','');groups.list.forEach(g=>row(g.name,g.id));
   $('#mvDel').classList.toggle('hidden',!p.custom||movingFromWin);
 }
-function openMove(id,fromWin){movingId=id;movingFromWin=!!fromWin;renderMove();openSheet('#sheetMove')}
+function openMove(id,fromWin){movingId=id;movingFromWin=!!fromWin;renderMove();say('#mvMsg','');openSheet('#sheetMove')}
 $('#mvNew').addEventListener('click',async()=>{
   const g=await newGroup();
   if(g&&movingId){groups.map[movingId]=g.id;saveGroups();renderMove();renderHome()}
@@ -1218,7 +1322,9 @@ function renderDone(doneList,prog){
   const countIn=id=>doneList.filter(p=>groups.map[p.id]===id).length;
   const tab=(label,onClick,cls)=>{const b=document.createElement('button');b.className='gtab'+(cls?' '+cls:'');b.textContent=label;b.addEventListener('click',onClick);gt.appendChild(b);return b};
   const pick=id=>{doneGroup=id;renderHome()};
-  const allB=tab('All ('+doneList.length+')',()=>pick('all'));if(doneGroup==='all')allB.classList.add('on');
+  const hasGroup=p=>groups.list.some(g=>g.id===groups.map[p.id]);
+  const ungrouped=doneList.filter(p=>!hasGroup(p));
+  const allB=tab('Ungrouped ('+ungrouped.length+')',()=>pick('all'));if(doneGroup==='all')allB.classList.add('on');
   groups.list.forEach(g=>{
     const b=tab(g.name+' ('+countIn(g.id)+')',()=>pick(g.id));if(doneGroup===g.id)b.classList.add('on');
   });
@@ -1227,15 +1333,15 @@ function renderDone(doneList,prog){
   head.classList.toggle('hidden',!inGroup);
   if(inGroup)$('#gHeadName').textContent=groupName(doneGroup);
   const grid=$('#doneGrid');grid.innerHTML='';
-  const shown=inGroup?doneList.filter(p=>groups.map[p.id]===doneGroup):doneList;
+  const shown=inGroup?doneList.filter(p=>groups.map[p.id]===doneGroup):ungrouped;
   shown.forEach(p=>{
     const gid=groups.map[p.id];
-    grid.appendChild(makeCard(p,prog.get(p.id),{inDone:true,chip:(!inGroup&&gid&&groupName(gid))||''}));
+    grid.appendChild(makeCard(p,prog.get(p.id),{inDone:true,chip:''}));
   });
   const em=$('#doneEmpty');
   em.classList.toggle('hidden',shown.length>0);
   em.textContent=!doneList.length?'Finish a puzzle and it shows up here. Then you can sort your finished art into groups.'
-    :inGroup?'Nothing in this group yet. Tap ⋯ on a finished puzzle to add it.':'';
+    :inGroup?'Nothing in this group yet. Tap ⋯ on a finished puzzle to add it.':'Every finished puzzle is in a group. Open a group tab above to see it.';
 }
 
 function renderHome(){
@@ -1277,7 +1383,7 @@ $('#gDelete').addEventListener('click',async()=>{
 });
 
 /* ---------- photo import ---------- */
-const imp={img:null,src:null,size:36,colors:16,smooth:1,pic:null,crop:null};
+const imp={img:null,src:null,size:64,colors:45,colorsAuto:true,smooth:1,pic:null,crop:null};
 function rgb2lab(r,g,b){
   const f=c=>{c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)};
   const R=f(r),G=f(g),B=f(b);
@@ -1286,40 +1392,68 @@ function rgb2lab(r,g,b){
   const fx_=t(X),fy=t(Y),fz=t(Z);
   return [116*fy-16,500*(fx_-fy),200*(fy-fz)];
 }
-// k-means in Lab space (distances match how eyes see color differences)
+// k-means in Lab space. Trains on a sample for speed, then assigns every pixel.
 function quantize(px,n,k){
   let seed=20240611;
   const rnd=()=>{seed=(seed+0x6D2B79F5)|0;let t=Math.imul(seed^(seed>>>15),1|seed);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296};
-  const cent=new Float32Array(k*3),d2=new Float32Array(n).fill(Infinity);
-  const first=Math.floor(rnd()*n);cent[0]=px[first*3];cent[1]=px[first*3+1];cent[2]=px[first*3+2];
+  const MAXS=14000,step=n>MAXS?Math.ceil(n/MAXS):1,sn=Math.ceil(n/step);
+  const sp=new Float32Array(sn*3);
+  for(let s0=0,i=0;i<n;i+=step,s0++){sp[s0*3]=px[i*3];sp[s0*3+1]=px[i*3+1];sp[s0*3+2]=px[i*3+2]}
+  k=Math.min(k,sn);
+  const cent=new Float32Array(k*3),d2=new Float32Array(sn).fill(Infinity);
+  const first=Math.floor(rnd()*sn);cent[0]=sp[first*3];cent[1]=sp[first*3+1];cent[2]=sp[first*3+2];
   for(let c=1;c<k;c++){
     let sum=0;const b=(c-1)*3;
-    for(let i=0;i<n;i++){
-      const d0=px[i*3]-cent[b],d1=px[i*3+1]-cent[b+1],d3=px[i*3+2]-cent[b+2],d=d0*d0+d1*d1+d3*d3;
+    for(let i=0;i<sn;i++){
+      const d0=sp[i*3]-cent[b],d1=sp[i*3+1]-cent[b+1],d3=sp[i*3+2]-cent[b+2],d=d0*d0+d1*d1+d3*d3;
       if(d<d2[i])d2[i]=d;sum+=d2[i];
     }
-    let r=rnd()*sum,pick=n-1;
-    for(let i=0;i<n;i++){r-=d2[i];if(r<=0){pick=i;break}}
-    cent[c*3]=px[pick*3];cent[c*3+1]=px[pick*3+1];cent[c*3+2]=px[pick*3+2];
+    let r=rnd()*sum,pick=sn-1;
+    for(let i=0;i<sn;i++){r-=d2[i];if(r<=0){pick=i;break}}
+    cent[c*3]=sp[pick*3];cent[c*3+1]=sp[pick*3+1];cent[c*3+2]=sp[pick*3+2];
   }
-  const asg=new Uint8Array(n);
-  for(let it=0;it<14;it++){
-    for(let i=0;i<n;i++){
+  const sa=new Uint8Array(sn);
+  for(let it=0;it<12;it++){
+    for(let i=0;i<sn;i++){
       let best=0,bd=Infinity;
       for(let c=0;c<k;c++){
-        const d0=px[i*3]-cent[c*3],d1=px[i*3+1]-cent[c*3+1],d3=px[i*3+2]-cent[c*3+2],d=d0*d0+d1*d1+d3*d3;
+        const d0=sp[i*3]-cent[c*3],d1=sp[i*3+1]-cent[c*3+1],d3=sp[i*3+2]-cent[c*3+2],d=d0*d0+d1*d1+d3*d3;
         if(d<bd){bd=d;best=c}
       }
-      asg[i]=best;
+      sa[i]=best;
     }
     const sum=new Float64Array(k*3),cnt=new Uint32Array(k);
-    for(let i=0;i<n;i++){const c=asg[i];sum[c*3]+=px[i*3];sum[c*3+1]+=px[i*3+1];sum[c*3+2]+=px[i*3+2];cnt[c]++}
+    for(let i=0;i<sn;i++){const c=sa[i];sum[c*3]+=sp[i*3];sum[c*3+1]+=sp[i*3+1];sum[c*3+2]+=sp[i*3+2];cnt[c]++}
     for(let c=0;c<k;c++){
       if(cnt[c]){cent[c*3]=sum[c*3]/cnt[c];cent[c*3+1]=sum[c*3+1]/cnt[c];cent[c*3+2]=sum[c*3+2]/cnt[c]}
-      else{const r=Math.floor(rnd()*n);cent[c*3]=px[r*3];cent[c*3+1]=px[r*3+1];cent[c*3+2]=px[r*3+2]}
+      else{const r=Math.floor(rnd()*sn);cent[c*3]=sp[r*3];cent[c*3+1]=sp[r*3+1];cent[c*3+2]=sp[r*3+2]}
     }
   }
+  const asg=new Uint8Array(n);
+  for(let i=0;i<n;i++){
+    let best=0,bd=Infinity;
+    const p0=px[i*3],p1=px[i*3+1],p2=px[i*3+2];
+    for(let c=0;c<k;c++){
+      const d0=p0-cent[c*3],d1=p1-cent[c*3+1],d3=p2-cent[c*3+2],d=d0*d0+d1*d1+d3*d3;
+      if(d<bd){bd=d;best=c}
+    }
+    asg[i]=best;
+  }
   return asg;
+}
+// unsharp mask: brings back fine edges lost when the photo is shrunk
+function sharpenRGB(d,w,h,amt){
+  const out=new Uint8ClampedArray(d.length);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const i=(y*w+x)*4;
+    for(let ch=0;ch<3;ch++){
+      let sum=0,cnt=0;
+      for(let dy=-1;dy<=1;dy++){const yy=y+dy;if(yy<0||yy>=h)continue;for(let dx=-1;dx<=1;dx++){const xx=x+dx;if(xx<0||xx>=w)continue;sum+=d[(yy*w+xx)*4+ch];cnt++}}
+      const c=d[i+ch];out[i+ch]=c+(c-sum/cnt)*amt;
+    }
+    out[i+3]=255;
+  }
+  return out;
 }
 // 3x3 median per channel: removes speckle but keeps edges
 function medianRGB(d,w,h){
@@ -1384,10 +1518,11 @@ function pixelate(data,w,h,k,smooth){
     const r=data[i*4],g=data[i*4+1],b=data[i*4+2],L=0.299*r+0.587*g+0.114*b;
     data[i*4]=clamp(L+(r-L)*sat,0,255);data[i*4+1]=clamp(L+(g-L)*sat,0,255);data[i*4+2]=clamp(L+(b-L)*sat,0,255);
   }
+  if(smooth===0)data=sharpenRGB(data,w,h,0.8);else if(smooth===1)data=sharpenRGB(data,w,h,0.5);
   if(smooth>=2)data=medianRGB(data,w,h);
   const lab=new Float32Array(n*3);
   for(let i=0;i<n;i++){const l=rgb2lab(data[i*4],data[i*4+1],data[i*4+2]);lab[i*3]=l[0];lab[i*3+1]=l[1];lab[i*3+2]=l[2]}
-  k=Math.max(1,Math.min(k,40,n));
+  k=Math.max(1,Math.min(k,255,n));
   const asg=quantize(lab,n,k);
   const info=[];
   for(let c=0;c<k;c++)info.push({n:0,L:0,A:0,B:0,r:0,g:0,b:0});
@@ -1397,7 +1532,7 @@ function pixelate(data,w,h,k,smooth){
   }
   const par=Array.from({length:k},(_,i)=>i);
   const find=c=>{while(par[c]!==c)c=par[c];return c};
-  const thr=[0,7,12][smooth]||0;
+  const thr=([0,7,12][smooth]||0)*Math.max(0.3,Math.min(1,64/Math.max(w,h))); // gentler merging on big, detailed images
   if(thr>0){ // merge colors that look almost the same
     for(;;){
       const act=[];for(let c=0;c<k;c++)if(info[c].n>0)act.push(c);
@@ -1456,19 +1591,40 @@ function drawImportPreview(){
   const g=c.getContext('2d'),id=g.createImageData(p.w,p.h);
   for(let i=0;i<p.cells.length;i++){const rgb=hex2rgb(p.palette[p.cells[i]-1]);id.data[i*4]=rgb[0];id.data[i*4+1]=rgb[1];id.data[i*4+2]=rgb[2];id.data[i*4+3]=255}
   g.putImageData(id,0,0);
-  const s=Math.max(1,Math.floor(Math.min(300/p.w,212/p.h)));
-  c.style.width=p.w*s+'px';c.style.height=p.h*s+'px';
+  let s=Math.min(300/p.w,212/p.h);if(s>=2)s=Math.floor(s);
+  c.style.width=p.w*s+'px';c.style.height=p.h*s+'px';c.style.imageRendering=s>=2?'pixelated':'auto';
   box.innerHTML='';box.appendChild(c);
 }
+const maxColorsFor=n=>Math.min(255,Math.max(16,Math.round(n*1.6)));
+const autoColorsFor=n=>Math.min(255,Math.max(8,Math.round(n*0.7)));
+function syncDetailUI(){
+  const n=imp.size,maxC=maxColorsFor(n);
+  if(imp.colorsAuto)imp.colors=autoColorsFor(n);
+  imp.colors=clamp(imp.colors,4,maxC);
+  $('#optDetail').value=n;
+  $$('#optSize .opt').forEach(b=>b.classList.toggle('on',+b.dataset.v===n));
+  const cs_=$('#optColors');cs_.max=maxC;cs_.value=imp.colors;
+  let dims='';
+  if(imp.img){
+    const k=n/Math.max(imp.img.width,imp.img.height),w=Math.max(4,Math.round(imp.img.width*k)),h=Math.max(4,Math.round(imp.img.height*k));
+    dims=' · '+w+'×'+h;
+  }
+  $('#detVal').textContent=n+' px'+dims;
+  $('#colVal').textContent=imp.colors+' (up to '+maxC+')';
+  $('#detNote').textContent=n>=160?'Extremely detailed: even tiny details stay visible. This is a very long puzzle, and the Fill tool helps a lot.':n>=96?'High detail: small features like eyes and lines stay visible.':'';
+}
+let impT=0;
+const rebuildSoon=()=>{clearTimeout(impT);impT=setTimeout(rebuildImport,200)};
 function rebuildImport(){
+  syncDetailUI();
   if(!imp.img)return;
   imp.pic=photoToPicture(imp.img,imp.size,imp.colors,($('#impName').value||'My photo').trim()||'My photo',imp.smooth);
   drawImportPreview();
   $('#impCreate').disabled=false;
-  $('#impCreate').textContent=`Create puzzle (${imp.pic.total} pixels, ${imp.pic.palette.length} colors)`;
+  $('#impCreate').textContent=`Create puzzle (${imp.pic.total.toLocaleString()} squares, ${imp.pic.palette.length} colors)`;
 }
 $('#btnImport').addEventListener('click',()=>{
-  resetImportPhoto();$('#impName').value='My photo';
+  resetImportPhoto();$('#impName').value='My photo';syncDetailUI();
   $('#impCreate').disabled=true;$('#impCreate').textContent='Create puzzle';$('#impFile').value='';
   openSheet('#sheetImport');
 });
@@ -1492,13 +1648,10 @@ function bindOpts(sel_,key){
     imp[key]=+b.dataset.v;rebuildImport();
   }));
 }
-bindOpts('#optSize','size');bindOpts('#optSmooth','smooth');
-const colSlider=$('#optColors');
-colSlider.addEventListener('input',()=>{
-  imp.colors=Math.min(40,Math.max(4,+colSlider.value));
-  $('#colVal').textContent='up to '+imp.colors+' (max 40)';
-  rebuildImport();
-});
+bindOpts('#optSmooth','smooth');
+$('#optDetail').addEventListener('input',e=>{imp.size=+e.target.value;syncDetailUI();rebuildSoon()});
+$$('#optSize .opt').forEach(b=>b.addEventListener('click',()=>{imp.size=+b.dataset.v;rebuildImport()}));
+$('#optColors').addEventListener('input',e=>{imp.colors=+e.target.value;imp.colorsAuto=false;$('#colVal').textContent=imp.colors+' (up to '+maxColorsFor(imp.size)+')';rebuildSoon()});
 $('#impCrop').addEventListener('click',openCrop);
 $('#impCreate').addEventListener('click',()=>{
   if(!imp.pic)return;
@@ -1796,6 +1949,125 @@ $('#btnSignOut').addEventListener('click',async()=>{
   saveNow();await flushCloud();
   try{await cloud().signOut()}catch(e){}
 });
+
+/* ---------- fill tool area setting ---------- */
+function fillHint(){return `Tap to fill every connected square (reach ${fillSize}×${fillSize}).`}
+function fillDescText(){
+  const gap=((fillSize-1)>>1)-1;
+  return `The fill always covers every connected square of your color. Each square reaches a ${fillSize}×${fillSize} area around itself, `+
+    (gap<=0?'so squares need to touch (corners count) to connect.':`so the fill can jump across gaps of up to ${gap} empty square${gap>1?'s':''}.`);
+}
+function syncFill(){
+  const lab=$('#fillLab');if(lab)lab.textContent=`Fill ${fillSize}×${fillSize}`;
+  $$('#optFill .opt').forEach(b=>b.classList.toggle('on',+b.dataset.v===fillSize));
+  $('#fillDesc').textContent=fillDescText();
+  $('#fillCur').textContent=`${fillSize}×${fillSize}`;
+}
+$$('#optFill .opt').forEach(b=>b.addEventListener('click',()=>{
+  fillSize=+b.dataset.v;
+  store.set('pp.fill',String(fillSize),'');
+  syncFill();hoverCell=-1;invalidate();
+}));
+$('#fillGear').addEventListener('click',e=>{e.stopPropagation();syncFill();openSheet('#sheetFill')});
+$('#btnFillSet').addEventListener('click',()=>{closeSheet('#sheetSettings');syncFill();openSheet('#sheetFill')});
+syncFill();
+syncDetailUI();
+
+/* ---------- auto-fill tool ---------- */
+let autoOn=false,autoPaused=false,autoQ=[],autoPos=0,autoLast=0,autoAcc=0,autoRaf=0;
+let autoCfg=(()=>{
+  try{const o=JSON.parse(store.get('pp.auto','')||'null');
+    if(o&&o.speed>=1&&o.speed<=10&&['number','top','random'].includes(o.order))return {speed:Math.round(o.speed),order:o.order}}catch(e){}
+  return {speed:6,order:'number'};
+})();
+const saveAuto=()=>store.set('pp.auto',JSON.stringify(autoCfg),'');
+const setIco=(el,name)=>{el.innerHTML='<svg viewBox="0 0 24 24">'+ICONS[name]+'</svg>'};
+// squares per second: levels 1-9 grow from 2 to about 270, level 10 (Max) finishes any puzzle in a few seconds
+function autoRate(){return autoCfg.speed>=10?Math.max(600,total/2.5):2*Math.pow(1.85,autoCfg.speed-1)}
+function fmtTime(sec){return sec<60?Math.max(1,Math.ceil(sec))+' sec':Math.ceil(sec/60)+' min'}
+function syncAuto(){
+  $('#optSpeed').value=autoCfg.speed;$('#autoSpd').value=autoCfg.speed;
+  const left=pic?Math.max(0,total-doneCount):0,rate=autoRate();
+  $('#spdVal').textContent=autoCfg.speed>=10?'Max':Math.round(rate)+' squares/sec';
+  $('#spdNote').textContent=pic&&left?`About ${fmtTime(left/rate)} for the ${left.toLocaleString()} squares left.`:'';
+  $$('#optOrder .opt').forEach(b=>b.classList.toggle('on',b.dataset.v===autoCfg.order));
+}
+function showAutoUI(){
+  $('#btnAuto').classList.toggle('running',autoOn);
+  $('#autoLab').textContent=autoOn?'Stop':'Auto';
+  setIco($('#autoIco'),autoOn?'stop':'play');
+  $('#autoBar').classList.toggle('hidden',!autoOn);
+  $('#autoPause').textContent=autoPaused?'Resume':'Pause';
+}
+function buildAutoQueue(){
+  const q=[],n=cells.length;
+  if(autoCfg.order==='number'){
+    const by=[];for(let c=1;c<=pal.length;c++)by[c]=[];
+    for(let i=0;i<n;i++){const c=cells[i];if(c&&!painted[i])by[c].push(i)}
+    for(let c=1;c<=pal.length;c++)for(const i of by[c])q.push(i);
+  }else{
+    for(let i=0;i<n;i++)if(cells[i]&&!painted[i])q.push(i);
+    if(autoCfg.order==='random')for(let i=q.length-1;i>0;i--){const j=(Math.random()*(i+1))|0,t=q[i];q[i]=q[j];q[j]=t}
+  }
+  return q;
+}
+function startAuto(){
+  if(!pic||autoOn)return;
+  if(total&&doneCount===total){toast('This puzzle is already finished',1500);return}
+  if(stroke.length)endStroke();
+  autoQ=buildAutoQueue();autoPos=0;autoAcc=0;autoOn=true;autoPaused=false;stroke=[];hoverCell=-1;
+  $('#autoTxt').textContent='Auto '+Math.floor(doneCount/total*100)+'%';
+  syncAuto();showAutoUI();
+  autoLast=performance.now();autoRaf=requestAnimationFrame(autoStep);
+}
+function autoStep(now){
+  autoRaf=0;
+  if(!autoOn||autoPaused||!pic)return;
+  const dt=Math.min(0.1,Math.max(0,(now-autoLast)/1000));autoLast=now;
+  autoAcc+=autoRate()*dt;
+  let n=Math.floor(autoAcc);autoAcc-=n;
+  const touched=new Set(),pop=n<=40,t=performance.now();let lastC=0;
+  while(n>0&&autoPos<autoQ.length){
+    const i=autoQ[autoPos++];
+    if(painted[i])continue;
+    const c=cells[i];
+    painted[i]=1;rem[c]--;doneCount++;stroke.push(i);
+    if(pop)pops.set(i,t);
+    touched.add(c);lastC=c;n--;
+  }
+  if(touched.size){
+    touched.forEach(refreshSw);
+    if(autoCfg.order==='number'&&lastC&&lastC!==sel)selectColor(lastC,autoRate()<60);
+    updateProgress();scheduleSave();invalidate();
+    blip(440+(doneCount/total)*560,.04,.05);
+    $('#autoTxt').textContent='Auto '+Math.floor(doneCount/total*100)+'%';
+  }
+  if(autoPos>=autoQ.length){finishAuto();return}
+  autoRaf=requestAnimationFrame(autoStep);
+}
+function finishAuto(){autoOn=false;autoPaused=false;showAutoUI();endStroke()}
+function stopAuto(userStopped){
+  if(!autoOn)return;
+  cancelAnimationFrame(autoRaf);autoRaf=0;
+  autoOn=false;autoPaused=false;showAutoUI();endStroke();
+  if(userStopped)toast('Auto-fill stopped',1400);
+}
+$('#btnAuto').addEventListener('click',()=>{autoOn?stopAuto(true):startAuto()});
+$('#autoGear').addEventListener('click',e=>{e.stopPropagation();syncAuto();openSheet('#sheetAuto')});
+$('#btnAutoSet').addEventListener('click',()=>{closeSheet('#sheetSettings');syncAuto();openSheet('#sheetAuto')});
+$('#autoStart').addEventListener('click',()=>{closeSheet('#sheetAuto');startAuto()});
+$('#autoStop').addEventListener('click',()=>stopAuto(true));
+$('#autoPause').addEventListener('click',()=>{
+  if(!autoOn)return;
+  autoPaused=!autoPaused;showAutoUI();
+  if(autoPaused){cancelAnimationFrame(autoRaf);autoRaf=0}
+  else{autoLast=performance.now();autoRaf=requestAnimationFrame(autoStep)}
+});
+const setSpeed=v=>{autoCfg.speed=clamp(Math.round(+v),1,10);saveAuto();syncAuto()};
+$('#optSpeed').addEventListener('input',e=>setSpeed(e.target.value));
+$('#autoSpd').addEventListener('input',e=>setSpeed(e.target.value));
+$$('#optOrder .opt').forEach(b=>b.addEventListener('click',()=>{autoCfg.order=b.dataset.v;saveAuto();syncAuto()}));
+syncAuto();
 
 /* ---------- boot ---------- */
 restoreHint();loadCustom();loadGroups();buildTheme();renderHome();show('home');renderAccount();bindCloud();
